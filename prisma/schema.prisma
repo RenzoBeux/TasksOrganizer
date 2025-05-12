@@ -1,0 +1,124 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String           @id @default(uuid())
+  email       String           @unique
+  displayName String
+  memberships Membership[]
+  completions TaskCompletion[]
+  assignments TaskAssignment[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model TaskList {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  memberships Membership[]
+  tasks       Task[]
+}
+
+model Membership {
+  id         String   @id @default(uuid())
+  role       Role     @default(MEMBER)
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  taskList   TaskList @relation(fields: [taskListId], references: [id])
+  taskListId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, taskListId])
+}
+
+model Task {
+  id            String            @id @default(uuid())
+  title         String
+  description   String?
+  dueDate       DateTime?
+  isRecurring   Boolean          @default(false)
+  taskList      TaskList         @relation(fields: [taskListId], references: [id])
+  taskListId    String
+  recurrenceRule RecurrenceRule?
+  occurrences   TaskOccurrence[]
+  assignments   TaskAssignment[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model RecurrenceRule {
+  id              String   @id @default(uuid())
+  frequency       Frequency
+  interval        Int
+  daysOfWeek      Int[]
+  daysOfMonth     Int[]
+  monthsOfYear    Int[]
+  ordinalWeekdays Json     // Array of { weekday: number, ordinal: number }
+  task            Task     @relation(fields: [taskId], references: [id])
+  taskId          String   @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model TaskOccurrence {
+  id          String           @id @default(uuid())
+  dueDate     DateTime
+  task        Task             @relation(fields: [taskId], references: [id])
+  taskId      String
+  completions TaskCompletion[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([taskId, dueDate])
+}
+
+model TaskCompletion {
+  id              String         @id @default(uuid())
+  occurrence      TaskOccurrence @relation(fields: [taskOccurrenceId], references: [id])
+  taskOccurrenceId String
+  user            User           @relation(fields: [userId], references: [id])
+  userId          String
+  completedAt     DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([taskOccurrenceId, userId])
+}
+
+model TaskAssignment {
+  id        String   @id @default(uuid())
+  task      Task     @relation(fields: [taskId], references: [id])
+  taskId    String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([taskId, userId])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+} 
