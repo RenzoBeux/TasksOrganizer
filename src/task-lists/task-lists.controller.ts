@@ -4,8 +4,10 @@ import { contract } from '../../api-contract/src/index';
 import { TaskListsService } from './task-lists.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Role } from '@prisma/client';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
 import { CreateTaskListDto } from './dto/create-task-list.dto';
+import { AddMemberDto } from './dto/add-member.dto';
+import { RemoveMemberDto } from './dto/remove-member.dto';
 
 @ApiTags('task-lists')
 @ApiBearerAuth('firebase-auth')
@@ -16,6 +18,7 @@ export class TaskListsController {
 
     @ApiOperation({ summary: 'Create a new task list' })
     @ApiResponse({ status: 201, description: 'The task list has been successfully created.' })
+    @ApiBody({ type: CreateTaskListDto })
     @TsRestHandler(contract.taskLists.create)
     async create(@Req() req: any) {
         return tsRestHandler(contract.taskLists.create, async ({ body }) => {
@@ -39,6 +42,7 @@ export class TaskListsController {
     @ApiOperation({ summary: 'Get a task list by id' })
     @ApiResponse({ status: 200, description: 'Return the task list.' })
     @ApiResponse({ status: 404, description: 'Task list not found.' })
+    @ApiParam({ name: 'id', type: String, description: 'Task list ID' })
     @TsRestHandler(contract.taskLists.findOne)
     async findOne(@Req() req: any) {
         return tsRestHandler(contract.taskLists.findOne, async ({ params }) => {
@@ -58,6 +62,8 @@ export class TaskListsController {
     @ApiOperation({ summary: 'Update a task list' })
     @ApiResponse({ status: 200, description: 'The task list has been successfully updated.' })
     @ApiResponse({ status: 404, description: 'Task list not found.' })
+    @ApiParam({ name: 'id', type: String, description: 'Task list ID' })
+    @ApiBody({ type: CreateTaskListDto })
     @TsRestHandler(contract.taskLists.update)
     async update(@Req() req: any) {
         return tsRestHandler(contract.taskLists.update, async ({ params, body }) => {
@@ -77,6 +83,7 @@ export class TaskListsController {
     @ApiOperation({ summary: 'Delete a task list' })
     @ApiResponse({ status: 200, description: 'The task list has been successfully deleted.' })
     @ApiResponse({ status: 404, description: 'Task list not found.' })
+    @ApiParam({ name: 'id', type: String, description: 'Task list ID' })
     @TsRestHandler(contract.taskLists.remove)
     async remove(@Req() req: any) {
         return tsRestHandler(contract.taskLists.remove, async ({ params }) => {
@@ -95,17 +102,21 @@ export class TaskListsController {
 
     @ApiOperation({ summary: 'Add a member to a task list' })
     @ApiResponse({ status: 201, description: 'Member added.' })
+    @ApiParam({ name: 'id', type: String, description: 'Task list ID' })
+    @ApiBody({ type: AddMemberDto })
     @TsRestHandler(contract.taskLists.addMember)
     async addMember(@Req() req: any) {
         return tsRestHandler(contract.taskLists.addMember, async ({ params, body }) => {
             const userId = req.user.id;
-            const memberships = await this.taskListsService.addMember(userId, params.id, body.userId, body.role as Role);
+            const memberships = await this.taskListsService.addMember(userId, params.id, body.userId, body.role as any);
             return { status: 201, body: memberships };
         });
     }
 
     @ApiOperation({ summary: 'Remove a member from a task list' })
     @ApiResponse({ status: 200, description: 'Member removed.' })
+    @ApiParam({ name: 'id', type: String, description: 'Task list ID' })
+    @ApiBody({ type: RemoveMemberDto })
     @TsRestHandler(contract.taskLists.removeMember)
     async removeMember(@Req() req: any) {
         return tsRestHandler(contract.taskLists.removeMember, async ({ params, body }) => {
