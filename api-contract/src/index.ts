@@ -33,6 +33,16 @@ export const CreateTaskListDtoSchema = z.object({
     description: z.string().optional(),
 });
 
+// AddMemberDto and RemoveMemberDto schemas
+export const AddMemberDtoSchema = z.object({
+    userId: z.string(),
+    role: z.nativeEnum({ OWNER: 'OWNER', ADMIN: 'ADMIN', MEMBER: 'MEMBER' }),
+});
+
+export const RemoveMemberDtoSchema = z.object({
+    userId: z.string(),
+});
+
 // Typescript types from zod schemas
 export type OrdinalWeekdayDto = z.infer<typeof OrdinalWeekdayDtoSchema>;
 export type CreateTaskDto = z.infer<typeof CreateTaskDtoSchema>;
@@ -80,6 +90,22 @@ export const contract = c.router({
             responses: {
                 200: z.undefined(),
                 404: z.undefined(),
+            },
+        },
+        addMember: {
+            method: 'POST',
+            path: '/:id/members',
+            body: AddMemberDtoSchema,
+            responses: {
+                201: z.array(z.any()), // Replace with Membership schema if available
+            },
+        },
+        removeMember: {
+            method: 'DELETE',
+            path: '/:id/members',
+            body: RemoveMemberDtoSchema,
+            responses: {
+                200: z.array(z.any()), // Replace with Membership schema if available
             },
         },
     }),

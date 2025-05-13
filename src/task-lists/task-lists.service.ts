@@ -154,4 +154,81 @@ export class TaskListsService {
             where: { id },
         });
     }
+
+    async addMember(requestingUserId: string, taskListId: string, userId: string, role: Role) {
+        // Check if the requesting user is OWNER or ADMIN
+        const membership = await this.prisma.membership.findUnique({
+            where: {
+                userId_taskListId: {
+                    userId: requestingUserId,
+                    taskListId,
+                },
+            },
+        });
+        if (!membership) {
+            throw new ForbiddenException('You do not have access to this task list');
+        }
+        if (membership.role !== Role.OWNER && membership.role !== Role.ADMIN) {
+            throw new ForbiddenException('You do not have permission to add members');
+        }
+        // Add the new member
+        await this.prisma.membership.create({
+            data: {
+                userId,
+                taskListId,
+                role,
+            },
+        });
+        // Return updated memberships
+        return this.prisma.membership.findMany({
+            where: { taskListId },
+            include: { user: { select: { id: true, email: true, displayName: true } } },
+        });
+    }
+
+    async removeMember(requestingUserId: string, taskListId: string, userId: string) {
+        // Check if the requesting user is OWNER or ADMIN
+        const membership = await this.prisma.membership.findUnique({
+            where: {
+                userId_taskListId: {
+                    userId: requestingUserId,
+                    taskListId,
+                },
+            },
+        });
+        if (!membership) {
+            throw new ForbiddenException('You do not have access to this task list');
+        }
+        if (membership.role !== Role.OWNER && membership.role !== Role.ADMIN) {
+            throw new ForbiddenException('You do not have permission to remove members');
+        }
+        // Prevent removing the owner
+        const targetMembership = await this.prisma.membership.findUnique({
+            where: {
+                userId_taskListId: {
+                    userId,
+                    taskListId,
+                },
+            },
+        });
+        if (!targetMembership) {
+            throw new NotFoundException('Membership not found');
+        }
+        if (targetMembership.role === Role.OWNER) {
+            throw new ForbiddenException('Cannot remove the owner of the task list');
+        }
+        await this.prisma.membership.delete({
+            where: {
+                userId_taskListId: {
+                    userId,
+                    taskListId,
+                },
+            },
+        });
+        // Return updated memberships
+        return this.prisma.membership.findMany({
+            where: { taskListId },
+            include: { user: { select: { id: true, email: true, displayName: true } } },
+        });
+    }
 } 
