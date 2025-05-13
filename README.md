@@ -1,90 +1,96 @@
-# Task Organizer API
+# Task Organizer Monorepo
 
-A collaborative task management application built with NestJS, TypeScript, Prisma, and PostgreSQL.
+## Shared API Contract (`api-contract`)
 
-## Features
+This monorepo contains a shared TypeScript API contract package, `api-contract`, which defines the types and endpoints for the backend API using [ts-rest](https://ts-rest.com/) and [zod](https://zod.dev/). This contract ensures type safety and consistency between backend and frontend.
 
-- User authentication and authorization
-- Task list management
-- Task creation and assignment
-- Recurring tasks with flexible scheduling
-- Task completion tracking
-- Role-based access control
+- **Location:** `api-contract/`
+- **Exports:**
+  - Zod schemas and TypeScript types for DTOs
+  - The `contract` object for use with ts-rest clients and servers
 
-## Prerequisites
+### How to Use the Contract
 
-- Node.js (v16 or later)
-- PostgreSQL (v12 or later)
-- npm or yarn
-
-## Setup
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd task-organizer
+**In your backend or frontend:**
+```ts
+import { contract } from '@renzobeux/taskorganizer-api-contract';
 ```
 
-2. Install dependencies:
-```bash
-npm install
+You can use the contract with ts-rest clients or servers to ensure your API and client are always in sync.
+
+### How to Build the Contract
+```sh
+yarn workspace @renzobeux/taskorganizer-api-contract run build
 ```
 
-3. Create a `.env` file in the root directory:
-```bash
-cp .env.example .env
+### How to Publish the Contract (GitHub Packages)
+```sh
+yarn workspace @renzobeux/taskorganizer-api-contract publish
 ```
 
-4. Update the `.env` file with your database credentials:
+### How to Install the Contract in Other Projects
+Add this to your `.npmrc`:
 ```
-DATABASE_URL="postgresql://username:password@localhost:5432/task_organizer?schema=public"
-PORT=3000
+@renzobeux:registry=https://npm.pkg.github.com/
 ```
-
-5. Run database migrations:
-```bash
-npm run prisma:migrate
-```
-
-6. Generate Prisma client:
-```bash
-npm run prisma:generate
+Then:
+```sh
+yarn add @renzobeux/taskorganizer-api-contract
 ```
 
-7. Start the development server:
-```bash
-npm run start:dev
+---
+
+## ⚠️ Yarn Workspaces Now Used
+
+This project now uses **Yarn** (not npm) for dependency management and workspaces. This change was made to support a shared `api-contract` package and resolve deep dependency issues that npm cannot handle in monorepos.
+
+**Do not use `npm install` or `npm run ...` for dependency management or scripts. Use `yarn` instead.**
+
+---
+
+## Getting Started
+
+1. **Install dependencies:**
+   ```sh
+   yarn install
+   ```
+
+2. **Build the shared contract package:**
+   ```sh
+   yarn workspace @renzobeux/taskorganizer-api-contract run build
+   ```
+
+3. **Develop as usual:**
+   - Backend and frontend can import from `@renzobeux/taskorganizer-api-contract` directly.
+   - All packages are managed via Yarn workspaces.
+
+4. **Publish the contract package (optional):**
+   ```sh
+   yarn workspace @renzobeux/taskorganizer-api-contract publish
+   ```
+
+---
+
+## Why Yarn?
+
+- Yarn workspaces allow you to share code (like the API contract) between backend and frontend without npm publish or copy-paste.
+- Yarn's `resolutions` and workspace features solve dependency conflicts that npm cannot handle in monorepos.
+- You can still publish packages to npm or GitHub Packages, but use Yarn for all local development and dependency management.
+
+---
+
+## Migration Note
+
+- If you previously used `npm install`, **delete `node_modules` and `package-lock.json`** before running `yarn install`.
+- Always use `yarn` commands from now on for adding/removing dependencies and running scripts.
+
+---
+
+## Example: Importing the Contract
+
+In your backend or frontend:
+```ts
+import { contract } from '@renzobeux/taskorganizer-api-contract';
 ```
 
-The API will be available at `http://localhost:3000`.
-
-## API Documentation
-
-Once the server is running, you can access the Swagger API documentation at:
-`http://localhost:3000/api`
-
-## Available Scripts
-
-- `npm run start:dev` - Start the development server
-- `npm run build` - Build the application
-- `npm run start:prod` - Start the production server
-- `npm run test` - Run tests
-- `npm run prisma:migrate` - Run database migrations
-- `npm run prisma:generate` - Generate Prisma client
-
-## Project Structure
-
-```
-src/
-├── auth/           # Authentication module
-├── prisma/         # Prisma service and module
-├── task-lists/     # Task list management
-├── tasks/          # Task management
-├── users/          # User management
-├── app.module.ts   # Main application module
-└── main.ts         # Application entry point
-```
-
-## License
-
-MIT 
+---

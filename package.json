@@ -41,7 +41,8 @@
         "passport-jwt": "^4.0.1",
         "reflect-metadata": "^0.1.13",
         "rxjs": "^7.8.1",
-        "zod": "^3.21.4"
+        "zod": "^3.21.4",
+        "lru-cache": "^6.0.0"
     },
     "devDependencies": {
         "@nestjs/cli": "^10.0.0",
@@ -83,5 +84,12 @@
         ],
         "coverageDirectory": "../coverage",
         "testEnvironment": "node"
+    },
+    "workspaces": [
+        "api-contract"
+    ],
+    "overrides": {
+        "@types/glob": false,
+        "@types/rimraf": false
     }
 }
