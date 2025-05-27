@@ -1,46 +1,46 @@
-import { initContract } from '@ts-rest/core';
-import { z } from 'zod';
+import { initContract } from "@ts-rest/core";
+import { z } from "zod";
 
 // Enums
 export enum Frequency {
-    DAILY = 'DAILY',
-    WEEKLY = 'WEEKLY',
-    MONTHLY = 'MONTHLY',
-    YEARLY = 'YEARLY',
+  DAILY = "DAILY",
+  WEEKLY = "WEEKLY",
+  MONTHLY = "MONTHLY",
+  YEARLY = "YEARLY",
 }
 
 // Zod schemas for DTOs
 export const OrdinalWeekdayDtoSchema = z.object({
-    weekday: z.number().int().min(0).max(6),
-    ordinal: z.number().int().min(1).max(5),
+  weekday: z.number().int().min(0).max(6),
+  ordinal: z.number().int().min(1).max(5),
 });
 
 export const CreateTaskDtoSchema = z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    isRecurring: z.boolean().optional(),
-    dueDate: z.string().datetime().optional(),
-    frequency: z.nativeEnum(Frequency).optional(),
-    interval: z.number().optional(),
-    daysOfWeek: z.array(z.number().int()).optional(),
-    daysOfMonth: z.array(z.number().int()).optional(),
-    monthsOfYear: z.array(z.number().int()).optional(),
-    ordinalWeekdays: z.array(OrdinalWeekdayDtoSchema).optional(),
+  title: z.string(),
+  description: z.string().optional(),
+  isRecurring: z.boolean().optional(),
+  dueDate: z.string().datetime().optional(),
+  frequency: z.nativeEnum(Frequency).optional(),
+  interval: z.number().optional(),
+  daysOfWeek: z.array(z.number().int()).optional(),
+  daysOfMonth: z.array(z.number().int()).optional(),
+  monthsOfYear: z.array(z.number().int()).optional(),
+  ordinalWeekdays: z.array(OrdinalWeekdayDtoSchema).optional(),
 });
 
 export const CreateTaskListDtoSchema = z.object({
-    name: z.string(),
-    description: z.string().optional(),
+  name: z.string(),
+  description: z.string().optional(),
 });
 
 // AddMemberDto and RemoveMemberDto schemas
 export const AddMemberDtoSchema = z.object({
-    userId: z.string(),
-    role: z.nativeEnum({ OWNER: 'OWNER', ADMIN: 'ADMIN', MEMBER: 'MEMBER' }),
+  userId: z.string(),
+  role: z.nativeEnum({ OWNER: "OWNER", ADMIN: "ADMIN", MEMBER: "MEMBER" }),
 });
 
 export const RemoveMemberDtoSchema = z.object({
-    userId: z.string(),
+  userId: z.string(),
 });
 
 // Typescript types from zod schemas
@@ -51,104 +51,114 @@ export type CreateTaskListDto = z.infer<typeof CreateTaskListDtoSchema>;
 const c = initContract();
 
 export const contract = c.router({
-    taskLists: c.router({
-        create: {
-            method: 'POST',
-            path: '/',
-            body: CreateTaskListDtoSchema,
-            responses: {
-                201: z.any(), // Replace with TaskList schema if available
-            },
-        },
-        findAll: {
-            method: 'GET',
-            path: '/',
-            responses: {
-                200: z.array(z.any()), // Replace with TaskList schema if available
-            },
-        },
-        findOne: {
-            method: 'GET',
-            path: '/:id',
-            responses: {
-                200: z.any(), // Replace with TaskList schema if available
-                404: z.undefined(),
-            },
-        },
-        update: {
-            method: 'PATCH',
-            path: '/:id',
-            body: CreateTaskListDtoSchema,
-            responses: {
-                200: z.any(), // Replace with TaskList schema if available
-                404: z.undefined(),
-            },
-        },
-        remove: {
-            method: 'DELETE',
-            path: '/:id',
-            responses: {
-                200: z.undefined(),
-                404: z.undefined(),
-            },
-        },
-        addMember: {
-            method: 'POST',
-            path: '/:id/members',
-            body: AddMemberDtoSchema,
-            responses: {
-                201: z.array(z.any()), // Replace with Membership schema if available
-            },
-        },
-        removeMember: {
-            method: 'DELETE',
-            path: '/:id/members',
-            body: RemoveMemberDtoSchema,
-            responses: {
-                200: z.array(z.any()), // Replace with Membership schema if available
-            },
-        },
-    }),
-    tasks: c.router({
-        create: {
-            method: 'POST',
-            path: '/tasklists/:taskListId/tasks',
-            body: CreateTaskDtoSchema,
-            responses: {
-                201: z.any(), // Replace with Task schema if available
-            },
-        },
-        findAll: {
-            method: 'GET',
-            path: '/tasklists/:taskListId/tasks',
-            responses: {
-                200: z.array(z.any()), // Replace with Task schema if available
-            },
-        },
-        findOne: {
-            method: 'GET',
-            path: '/:id',
-            responses: {
-                200: z.any(), // Replace with Task schema if available
-                404: z.undefined(),
-            },
-        },
-        update: {
-            method: 'PATCH',
-            path: '/:id',
-            body: CreateTaskDtoSchema,
-            responses: {
-                200: z.any(), // Replace with Task schema if available
-                404: z.undefined(),
-            },
-        },
-        remove: {
-            method: 'DELETE',
-            path: '/:id',
-            responses: {
-                200: z.undefined(),
-                404: z.undefined(),
-            },
-        },
-    }),
-}); 
+  taskLists: c.router({
+    create: {
+      method: "POST",
+      path: "/",
+      body: CreateTaskListDtoSchema,
+      responses: {
+        201: z.any(), // Replace with TaskList schema if available
+      },
+    },
+    findAll: {
+      method: "GET",
+      path: "/",
+      responses: {
+        200: z.array(z.any()), // Replace with TaskList schema if available
+      },
+    },
+    findOne: {
+      method: "GET",
+      path: "/:id",
+      pathParams: c.type<{ id: string }>(),
+      responses: {
+        200: z.any(), // Replace with TaskList schema if available
+        404: z.undefined(),
+      },
+    },
+    update: {
+      method: "PATCH",
+      path: "/:id",
+      pathParams: c.type<{ id: string }>(),
+      body: CreateTaskListDtoSchema,
+      responses: {
+        200: z.any(), // Replace with TaskList schema if available
+        404: z.undefined(),
+      },
+    },
+    remove: {
+      method: "DELETE",
+      path: "/:id",
+      pathParams: c.type<{ id: string }>(),
+      responses: {
+        200: z.undefined(),
+        404: z.undefined(),
+      },
+    },
+    addMember: {
+      method: "POST",
+      path: "/:id/members",
+      pathParams: c.type<{ id: string }>(),
+      body: AddMemberDtoSchema,
+      responses: {
+        201: z.array(z.any()), // Replace with Membership schema if available
+      },
+    },
+    removeMember: {
+      method: "DELETE",
+      path: "/:id/members",
+      pathParams: c.type<{ id: string }>(),
+      body: RemoveMemberDtoSchema,
+      responses: {
+        200: z.array(z.any()), // Replace with Membership schema if available
+      },
+    },
+  }),
+  tasks: c.router({
+    create: {
+      method: "POST",
+      path: "/tasklists/:taskListId/tasks",
+      pathParams: c.type<{ taskListId: string }>(),
+      body: CreateTaskDtoSchema,
+      responses: {
+        201: z.any(), // Replace with Task schema if available
+      },
+    },
+    findAll: {
+      method: "GET",
+      path: "/tasklists/:taskListId/tasks",
+      pathParams: c.type<{ taskListId: string }>(),
+      responses: {
+        200: z.array(z.any()), // Replace with Task schema if available
+      },
+    },
+    findOne: {
+      method: "GET",
+      path: "/:id",
+      pathParams: c.type<{ id: string }>(),
+      responses: {
+        200: z.any(), // Replace with Task schema if available
+        404: z.undefined(),
+      },
+    },
+    update: {
+      method: "PATCH",
+      path: "/:id",
+      pathParams: c.type<{ id: string }>(),
+      body: CreateTaskDtoSchema,
+      responses: {
+        200: z.any(), // Replace with Task schema if available
+        404: z.undefined(),
+      },
+    },
+    remove: {
+      method: "DELETE",
+      path: "/:id",
+      pathParams: c.type<{ id: string }>(),
+      responses: {
+        200: z.undefined(),
+        404: z.undefined(),
+      },
+    },
+  }),
+});
