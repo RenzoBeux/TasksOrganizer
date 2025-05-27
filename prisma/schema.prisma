@@ -121,4 +121,4 @@ enum Frequency {
   WEEKLY
   MONTHLY
   YEARLY
-} 
+}

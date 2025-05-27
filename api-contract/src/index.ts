@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-
+import { TaskListSchema, TaskSchema, MembershipSchema } from "./schemas";
 // Enums
 export enum Frequency {
   DAILY = "DAILY",
@@ -57,14 +57,14 @@ export const contract = c.router({
       path: "/",
       body: CreateTaskListDtoSchema,
       responses: {
-        201: z.any(), // Replace with TaskList schema if available
+        201: TaskListSchema,
       },
     },
     findAll: {
       method: "GET",
       path: "/",
       responses: {
-        200: z.array(z.any()), // Replace with TaskList schema if available
+        200: z.array(TaskListSchema),
       },
     },
     findOne: {
@@ -72,7 +72,7 @@ export const contract = c.router({
       path: "/:id",
       pathParams: c.type<{ id: string }>(),
       responses: {
-        200: z.any(), // Replace with TaskList schema if available
+        200: TaskListSchema,
         404: z.undefined(),
       },
     },
@@ -82,7 +82,7 @@ export const contract = c.router({
       pathParams: c.type<{ id: string }>(),
       body: CreateTaskListDtoSchema,
       responses: {
-        200: z.any(), // Replace with TaskList schema if available
+        200: TaskListSchema,
         404: z.undefined(),
       },
     },
@@ -101,7 +101,7 @@ export const contract = c.router({
       pathParams: c.type<{ id: string }>(),
       body: AddMemberDtoSchema,
       responses: {
-        201: z.array(z.any()), // Replace with Membership schema if available
+        201: z.array(MembershipSchema),
       },
     },
     removeMember: {
@@ -110,7 +110,7 @@ export const contract = c.router({
       pathParams: c.type<{ id: string }>(),
       body: RemoveMemberDtoSchema,
       responses: {
-        200: z.array(z.any()), // Replace with Membership schema if available
+        200: z.array(MembershipSchema),
       },
     },
   }),
@@ -121,7 +121,7 @@ export const contract = c.router({
       pathParams: c.type<{ taskListId: string }>(),
       body: CreateTaskDtoSchema,
       responses: {
-        201: z.any(), // Replace with Task schema if available
+        201: TaskSchema,
       },
     },
     findAll: {
@@ -129,7 +129,7 @@ export const contract = c.router({
       path: "/tasklists/:taskListId/tasks",
       pathParams: c.type<{ taskListId: string }>(),
       responses: {
-        200: z.array(z.any()), // Replace with Task schema if available
+        200: z.array(TaskSchema),
       },
     },
     findOne: {
@@ -137,7 +137,7 @@ export const contract = c.router({
       path: "/:id",
       pathParams: c.type<{ id: string }>(),
       responses: {
-        200: z.any(), // Replace with Task schema if available
+        200: TaskSchema,
         404: z.undefined(),
       },
     },
@@ -147,7 +147,7 @@ export const contract = c.router({
       pathParams: c.type<{ id: string }>(),
       body: CreateTaskDtoSchema,
       responses: {
-        200: z.any(), // Replace with Task schema if available
+        200: TaskSchema,
         404: z.undefined(),
       },
     },
