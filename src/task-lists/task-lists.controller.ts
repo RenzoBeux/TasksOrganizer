@@ -1,4 +1,3 @@
-
 import { Controller, Req, UseGuards } from "@nestjs/common";
 import { TsRestHandler, tsRestHandler } from "@ts-rest/nest";
 import { contract } from "../../api-contract/src/index";
@@ -17,16 +16,40 @@ import { CreateTaskListDto } from "./dto/create-task-list.dto";
 import { AddMemberDto } from "./dto/add-member.dto";
 import { RemoveMemberDto } from "./dto/remove-member.dto";
 
-
 @ApiTags("task-lists")
 @ApiBearerAuth("firebase-auth")
 @UseGuards(JwtAuthGuard)
-@Controller("tasklists")
+@Controller()
 export class TaskListsController {
   constructor(private readonly taskListsService: TaskListsService) {}
 
+  @ApiOperation({ summary: "Get all occurrences for a task list" })
+  @ApiResponse({
+    status: 200,
+    description: "Return all occurrences for the task list.",
+  })
+  @ApiParam({ name: "taskListId", type: String, description: "Task list ID" })
+  @TsRestHandler(contract.tasklists.getOccurrencesByTaskList)
+  async getOccurrencesByTaskList(@Req() req: any) {
+    return tsRestHandler(
+      contract.tasklists.getOccurrencesByTaskList,
+      async ({ params }) => {
+        const userId = req.user.id;
+        const occurrences =
+          await this.taskListsService.getOccurrencesByTaskList(
+            userId,
+            params.taskListId
+          );
+        return { status: 200, body: occurrences };
+      }
+    );
+  }
+
   @ApiOperation({ summary: "Get all tasks in a task list" })
-  @ApiResponse({ status: 200, description: "Return all tasks in the task list." })
+  @ApiResponse({
+    status: 200,
+    description: "Return all tasks in the task list.",
+  })
   @ApiParam({ name: "id", type: String, description: "Task list ID" })
   @TsRestHandler(contract.tasks.findAllTasks)
   async findAllTasks(@Req() req: any) {

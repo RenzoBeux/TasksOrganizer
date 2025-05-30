@@ -16,9 +16,46 @@ import { CreateTaskDto } from "./dto/create-task.dto";
 @ApiTags("tasks")
 @ApiBearerAuth("firebase-auth")
 @UseGuards(JwtAuthGuard)
-@Controller("tasks")
+@Controller()
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
+
+  @ApiOperation({ summary: "Complete or un-complete a task occurrence" })
+  @ApiResponse({ status: 200, description: "The occurrence has been updated." })
+  @ApiResponse({ status: 404, description: "Occurrence not found." })
+  @ApiParam({
+    name: "occurrenceId",
+    type: String,
+    description: "Occurrence ID",
+  })
+  @ApiBody({ schema: { example: { completed: true } } })
+  @TsRestHandler(contract.tasks.completeTaskOccurrence)
+  async completeTaskOccurrence(@Req() req: any) {
+    return tsRestHandler(
+      contract.tasks.completeTaskOccurrence,
+      async ({ params, body }) => {
+        const userId = req.user.id;
+        try {
+          const updated = await this.tasksService.completeTaskOccurrence(
+            userId,
+            params.occurrenceId,
+            body.completed
+          );
+          return { status: 200, body: updated };
+        } catch (e) {
+          if (
+            typeof e === "object" &&
+            e !== null &&
+            "status" in e &&
+            (e as any).status === 404
+          ) {
+            return { status: 404, body: undefined };
+          }
+          throw e;
+        }
+      }
+    );
+  }
 
   @ApiOperation({ summary: "Create a new task in a task list" })
   @ApiResponse({

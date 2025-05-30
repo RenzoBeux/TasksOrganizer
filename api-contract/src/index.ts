@@ -166,6 +166,14 @@ export const contract = c.router({
         404: z.undefined(),
       },
     },
+    getOccurrencesByTaskList: {
+      method: "GET",
+      path: "/tasklists/:taskListId/occurrences",
+      pathParams: c.type<{ taskListId: string }>(),
+      responses: {
+        200: z.array(TaskOccurrenceSchema),
+      },
+    },
   }),
   tasks: c.router({
     create: {
@@ -214,7 +222,18 @@ export const contract = c.router({
         404: z.undefined(),
       },
     },
+    completeTaskOccurrence: {
+      method: "PATCH",
+      path: "/occurrences/:occurrenceId/complete",
+      pathParams: c.type<{ occurrenceId: string }>(),
+      body: z.object({ completed: z.boolean() }),
+      responses: {
+        200: TaskOccurrenceSchema,
+        404: z.undefined(),
+      },
+    },
   }),
 });
 
-export type { RoleEnum, FrequencyEnum };
+export { RoleEnum, FrequencyEnum };
+export * from "./schemas";

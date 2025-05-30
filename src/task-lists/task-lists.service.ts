@@ -11,6 +11,27 @@ import { Role } from "@prisma/client";
 export class TaskListsService {
   constructor(private prisma: PrismaService) {}
 
+  async getOccurrencesByTaskList(userId: string, taskListId: string) {
+    // Check if the user is a member of the task list
+    const membership = await this.prisma.membership.findUnique({
+      where: {
+        userId_taskListId: {
+          userId,
+          taskListId,
+        },
+      },
+    });
+    if (!membership) {
+      throw new ForbiddenException("You do not have access to this task list");
+    }
+    // Return all occurrences for the task list
+    return this.prisma.taskOccurrence.findMany({
+      where: {
+        task: { taskListId },
+      },
+    });
+  }
+
   async create(userId: string, createTaskListDto: CreateTaskListDto) {
     const taskList = await this.prisma.taskList.create({
       data: {
@@ -179,8 +200,28 @@ export class TaskListsService {
     if (membership.role !== Role.OWNER) {
       throw new ForbiddenException("Only the owner can delete a task list");
     }
+    // Delete the task list and all associated tasks, memberships
+    const taskList = await this.prisma.taskList.findUnique({
+      where: { id },
+      include: {
+        tasks: true,
+        memberships: true,
+      },
+    });
 
-    await this.prisma.taskList.delete({
+    if (!taskList) {
+      throw new NotFoundException(`Task list with ID ${id} not found`);
+    }
+    // Delete all tasks associated with the task list
+    await this.prisma.task.deleteMany({
+      where: { taskListId: id },
+    });
+    // Delete all memberships associated with the task list
+    await this.prisma.membership.deleteMany({
+      where: { taskListId: id },
+    });
+    // Finally, delete the task list itself
+    return this.prisma.taskList.delete({
       where: { id },
     });
   }
